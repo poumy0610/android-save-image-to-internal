@@ -31,12 +31,12 @@ public class MainActivity extends AppCompatActivity {
         initView();
 
         // check permission got or not
-        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         // if permission not get
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.CAMERA},
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1);
         } else {
             Toast.makeText(this, "已獲得儲存權限!", Toast.LENGTH_SHORT).show();
@@ -67,10 +67,24 @@ public class MainActivity extends AppCompatActivity {
     // save to Internal storage
     private boolean saveToPictureFolder() {
         //取得 Pictures 目錄
-        File picDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File picDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES+"/stock_app");
         Log.d(">>>", "Pictures Folder path: " + picDir.getAbsolutePath());
+
+
         //假如有該目錄
-        if (picDir.exists()) {
+        if (!picDir.exists()) {
+            if(picDir.mkdirs()) {  // else means something wrong
+                System.out.println("Directory Created");
+
+                //儲存圖片
+                File pic = new File(picDir, "pic.jpg");
+                imgPicture.setDrawingCacheEnabled(true);
+                imgPicture.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_AUTO);
+                Bitmap bmp = imgPicture.getDrawingCache();
+
+                return saveBitmap(bmp, pic);
+            }
+        } else {
             //儲存圖片
             File pic = new File(picDir, "pic.jpg");
             imgPicture.setDrawingCacheEnabled(true);
@@ -79,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
             return saveBitmap(bmp, pic);
         }
+
         return false;
     }
 
